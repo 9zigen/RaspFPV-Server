@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <strings.h>
 #include <string.h>
+#include <time.h>
 #include "routines.h"
 
 #include <stdio.h>
