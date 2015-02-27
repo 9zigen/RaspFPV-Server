@@ -126,7 +126,8 @@ void processMsg(int client,unsigned char *buf, int len) {
 			memcpy(ip,buf+1,4);
 			memcpy(&tmp,buf+5,4);
 			port = ntohl(tmp);
-			fpvtype = buf[9];	
+			fpvtype = buf[9];
+			if (verbose) printf("Received fpvtype: %i\n",fpvtype);				
 			if (!cam_active) startCam(ip,port,fpvtype);
 			break;
 		case 1: stopCam(); 
