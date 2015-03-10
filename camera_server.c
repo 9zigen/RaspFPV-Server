@@ -203,6 +203,13 @@ int main(int argc, char **argv)
 	}
 
 	/* Open Com Port  */
+	int ci, cn,
+			cport_nr=22,        /* /dev/ttyAMA0 */
+			bdrate=115200;       /* 115200 baud */
+
+		unsigned char cbuf[512];
+		char cmode[]={'8','N','1',0};
+		
 	if(RS232_OpenComport(cport_nr, bdrate, mode))
 	{
 		printf("Can not open comport\n");
@@ -282,13 +289,6 @@ int main(int argc, char **argv)
 			}
 
 		}
-
-		int ci, cn,
-			cport_nr=22,        /* /dev/ttyAMA0 */
-			bdrate=115200;       /* 115200 baud */
-
-		unsigned char cbuf[512];
-		char cmode[]={'8','N','1',0};
 
 		if (!stop) {
 			cn = RS232_PollComport(cport_nr, cbuf, 512);
