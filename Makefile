@@ -6,7 +6,7 @@ CC_OPTS=-lrt
 
 INSTALL=install
 
-OBJS=camera_server.o routines.o
+OBJS=camera_server.o routines.o NazaDecoderLib.o rs232.o
 
 %.o: %.c                                                                         
 	$(CXX) -c $(CXX_OPTS) $< -o $@ 
