@@ -12,16 +12,16 @@ NazaDecoderLib::NazaDecoderLib()
   cs2 = 0;
 }
 
-int32_t NazaDecoderLib::decodeLong(uint8_t idx, uint8_t mask)
+unsigned char NazaDecoderLib::decodeLong(unsigned char idx, unsigned char mask)
 {
-  union { uint32_t l; uint8_t b[4]; } val;
+  union { unsigned int l; unsigned char b[4]; } val;
   for(int i = 0; i < 4; i++) val.b[i] = payload[idx + i] ^ mask;
   return val.l;
 }
 
-int16_t NazaDecoderLib::decodeShort(uint8_t idx, uint8_t mask)
+unsigned char NazaDecoderLib::decodeShort(unsigned char idx, unsigned char mask)
 {
-  union { uint16_t s; uint8_t b[2]; } val;
+  union { unsigned short int s; unsigned char b[2]; } val;
   for(int i = 0; i < 2; i++) val.b[i] = payload[idx + i] ^ mask;
   return val.s;
 }
@@ -37,20 +37,20 @@ double NazaDecoderLib::getLon() { return lon; }
 double NazaDecoderLib::getGpsAlt() { return gpsAlt; }
 double NazaDecoderLib::getSpeed() { return spd; }
 NazaDecoderLib::fixType_t  NazaDecoderLib::getFixType() { return fix; }
-uint8_t NazaDecoderLib::getNumSat() { return sat; }
+unsigned char NazaDecoderLib::getNumSat() { return sat; }
 double NazaDecoderLib::getHeadingNc() { return headingNc; }
 double NazaDecoderLib::getCog() { return cog; }
 double NazaDecoderLib::getGpsVsi() { return gpsVsi; }
 double NazaDecoderLib::getHdop() { return hdop; }
 double NazaDecoderLib::getVdop() { return vdop; }
-uint8_t NazaDecoderLib::getYear() { return year; }
-uint8_t NazaDecoderLib::getMonth() { return month; }
-uint8_t NazaDecoderLib::getDay() { return day; }
-uint8_t NazaDecoderLib::getHour() { return hour; }
-uint8_t NazaDecoderLib::getMinute() { return minute; }
-uint8_t NazaDecoderLib::getSecond() { return second; }
+unsigned char NazaDecoderLib::getYear() { return year; }
+unsigned char NazaDecoderLib::getMonth() { return month; }
+unsigned char NazaDecoderLib::getDay() { return day; }
+unsigned char NazaDecoderLib::getHour() { return hour; }
+unsigned char NazaDecoderLib::getMinute() { return minute; }
+unsigned char NazaDecoderLib::getSecond() { return second; }
 
-uint8_t NazaDecoderLib::decode(int input)
+unsigned char NazaDecoderLib::decode(int input)
 { 
   if((seq == 0) && (input == 0x55)) { seq++; }                                                            // header (part 1 - 0x55)
   else if((seq == 1) && (input == 0xAA)) { cs1 = 0; cs2 = 0; seq++; }                                     // header (part 2 - 0xAA) 
@@ -68,8 +68,8 @@ uint8_t NazaDecoderLib::decode(int input)
     // Decode GPS data
     if(msgId == NAZA_MESSAGE_GPS)
     {
-      uint8_t mask = payload[55];
-      uint32_t time = decodeLong(0, mask);
+      unsigned char mask = payload[55];
+      unsigned int time = decodeLong(0, mask);
       second = time & 0b00111111; time >>= 6;
       minute = time & 0b00111111; time >>= 6;
       hour = time & 0b00001111; time >>= 4;
@@ -90,8 +90,8 @@ uint8_t NazaDecoderLib::decode(int input)
       double edop = (double)decodeShort(46, mask) / 100;
       hdop = sqrt(ndop * ndop + edop * edop);
       sat  = payload[48];
-      uint8_t fixType = payload[50] ^ mask;
-      uint8_t fixFlags = payload[52] ^ mask;
+      unsigned char fixType = payload[50] ^ mask;
+      unsigned char fixFlags = payload[52] ^ mask;
       switch(fixType)
       {
         case 2 : fix = FIX_2D; break;
@@ -103,10 +103,10 @@ uint8_t NazaDecoderLib::decode(int input)
     // Decode compass data (not tilt compensated)
     else if (msgId == NAZA_MESSAGE_COMPASS)
     {
-      uint8_t mask = payload[4];
+      unsigned char mask = payload[4];
       mask = (((mask ^ (mask >> 4)) & 0x0F) | ((mask << 3) & 0xF0)) ^ (((mask & 0x01) << 3) | ((mask & 0x01) << 7)); 
-      int16_t x = decodeShort(0, mask);
-      int16_t y = decodeShort(2, mask);
+      unsigned short int x = decodeShort(0, mask);
+      unsigned short int y = decodeShort(2, mask);
       if(x > magXMax) magXMax = x;
       if(x < magXMin) magXMin = x;
       if(y > magYMax) magYMax = y;

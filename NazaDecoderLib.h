@@ -14,7 +14,6 @@
     
 #include <stdlib.h>         
 #include <string.h>
-#include <cstdint>
 #include <math.h>
 
 // Uncomment the line below if you want to disable attitude (pitch/roll) sensing. This may be useful when you experience a conflict with another library that also uses the interrupt
@@ -36,24 +35,24 @@ class NazaDecoderLib
 
     NazaDecoderLib();
 
-    uint8_t decode(int input);
+    unsigned char decode(int input);
     double getLat();
     double getLon();
     double getGpsAlt();
     double getSpeed();
     fixType_t getFixType();
-    uint8_t getNumSat();
+    unsigned char getNumSat();
     double getHeadingNc();
     double getCog();
     double getGpsVsi();
     double getHdop();
     double getVdop();
-    uint8_t getYear();
-    uint8_t getMonth();
-    uint8_t getDay();
-    uint8_t getHour(); // Note that for time between 16:00 and 23:59 the hour returned from GPS module is actually 00:00 - 7:59.
-    uint8_t getMinute();
-    uint8_t getSecond();
+    unsigned char getYear();
+    unsigned char getMonth();
+    unsigned char getDay();
+    unsigned char getHour(); // Note that for time between 16:00 and 23:59 the hour returned from GPS module is actually 00:00 - 7:59.
+    unsigned char getMinute();
+    unsigned char getSecond();
 
   private:
     int payload[58];
@@ -61,33 +60,33 @@ class NazaDecoderLib
     int cnt;
     int msgId;
     int msgLen;
-    uint8_t cs1; // checksum #1
-    uint8_t cs2; // checksum #2
-    int16_t magXMin;
-    int16_t magXMax;
-    int16_t magYMin;
-    int16_t magYMax;
+    unsigned char cs1; // checksum #1
+    unsigned char cs2; // checksum #2
+    unsigned char magXMin;
+    unsigned char magXMax;
+    unsigned char magYMin;
+    unsigned char magYMax;
 
     double lon;     // longitude in degree decimal
     double lat;     // latitude in degree decimal
     double gpsAlt;  // altitude in m (from GPS)
     double spd;     // speed in m/s
     fixType_t fix;   // fix type
-    uint8_t sat;     // number of satellites
+    unsigned char sat;     // number of satellites
     double headingNc;// heading (not tilt compensated) in degrees
     double cog;     // course over ground
     double gpsVsi;  // vertical speed indicator (from GPS) in m/s (a.k.a. climb speed)
     double hdop;    // horizontal dilution of precision
     double vdop;    // vertical dilution of precision
-    uint8_t year;
-    uint8_t month;
-    uint8_t day;
-    uint8_t hour;
-    uint8_t minute;
-    uint8_t second;
+    unsigned char year;
+    unsigned char month;
+    unsigned char day;
+    unsigned char hour;
+    unsigned char minute;
+    unsigned char second;
 
-    int32_t  decodeLong(uint8_t idx, uint8_t mask);
-    int16_t  decodeShort(uint8_t idx, uint8_t mask);
+    unsigned char  decodeLong(unsigned char idx, unsigned char mask);
+    unsigned char  decodeShort(unsigned char idx, unsigned char mask);
     void     updateCS(int input);
 };
 
