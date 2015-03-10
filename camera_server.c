@@ -290,24 +290,21 @@ int main(int argc, char **argv)
 		    if(cn > 0)
 		    {
 		      	cbuf[cn] = 0;   /* always put a "null" at the end of a string! */
-		    	uint8_t decodedMessage;
+		    	unsigned char decodedMessage;
 
 			    for(ci=0; ci < cn; ci++)
 			    {
-			        if(cbuf[ci] < 32)  /* replace unreadable control-codes by dots */
-			        {
-			          cbuf[ci] = '.';
-			        }
 			        decodedMessage = NazaDecoder.decode(cbuf[ci]);
 			    }
 
-			    printf("received %i bytes: %s\n", cn, (char *)cbuf);
+			    //printf("received %i bytes: %s\n", cn, (char *)cbuf);
 			    switch (decodedMessage)
 			    {
 			      case NAZA_MESSAGE_GPS:
 			        printf("Lat: %lf\n", NazaDecoder.getLat());
 			        printf("Lon: %lf\n", NazaDecoder.getLon());
 			        printf("Alt: %lf\n", NazaDecoder.getGpsAlt());
+			        printf("Spd: %lf\n", NazaDecoder.getSpeed());
 			        //printf("Fix: %s\n", NazaDecoder.getFixType());
 			        printf("Sat: %c\n", NazaDecoder.getNumSat());
 			        telem.volt 		= 3.5;
