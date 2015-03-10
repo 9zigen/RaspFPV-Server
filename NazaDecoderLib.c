@@ -21,7 +21,7 @@ int NazaDecoderLib::decodeLong(unsigned char idx, unsigned char mask)
 
 short int NazaDecoderLib::decodeShort(unsigned char idx, unsigned char mask)
 {
-  union { ushort int s; unsigned char b[2]; } val;
+  union { unsigned short int s; unsigned char b[2]; } val;
   for(int i = 0; i < 2; i++) val.b[i] = payload[idx + i] ^ mask;
   return val.s;
 }
