@@ -12,14 +12,9 @@
 #include <sys/stat.h>
 #include <strings.h>
 #include <string.h>
-#include "rs232.h"
 #include "routines.h"
-#include "NazaDecoderLib.h"
-#include <stdio.h>
 
-#ifndef ATTITUDE_SENSING_DISABLED
-	uint32_t currTime, attiTime;
-#endif
+#include <stdio.h>
 
 #define CAM_CMD "/usr/local/bin/camera_streamer.sh"
 char cam_cmd[128];
@@ -42,7 +37,6 @@ int background = 0;
 int stop = 0;
 
 int cam_active = 0;
-unsigned int prev_fpvType;
 
 void print_usage() {
 	printf("-d run in background\n");
@@ -121,8 +115,8 @@ void processMsg(int client,unsigned char *buf, int len) {
 	unsigned char ip[4];
 	int port;
 	int tmp;
-	unsigned int type;
-	unsigned int fpvtype;
+	int type;
+	uint8_t fpvtype;
 
 	type = buf[0];
 	if (verbose) printf("Received type: %i\n",type);
@@ -133,11 +127,6 @@ void processMsg(int client,unsigned char *buf, int len) {
 			memcpy(&tmp,buf+5,4);
 			port = ntohl(tmp);
 			fpvtype = buf[9];
-			if (prev_fpvType != fpvtype) {
-				stopCam();
-				prev_fpvType = fpvtype;
-				startCam(ip,port,fpvtype);
-			}
 			if (verbose) printf("Received fpvtype: %i\n",fpvtype);				
 			if (!cam_active) startCam(ip,port,fpvtype);
 			break;
@@ -161,17 +150,6 @@ int main(int argc, char **argv)
 	struct timespec *dt;
 	long dt_ms = 0;
 	verbose = 1;
-	
-	struct Telemetry
-	{
-		float volt;		// voltage, analog read (TODO)
-		float amp;		// amperage, analog read (TODO)
-		double lon;     // longitude in degree decimal
-	    double lat;     // latitude in degree decimal
-	    double gpsAlt;  // altitude in m (from GPS)
-	    double spd;     // speed in m/s
-	    double gpsVsi;  // vertical speed indicator (from GPS) in m/s (a.k.a. climb speed)
-	} telem;
 
 	int option;
 
@@ -272,75 +250,8 @@ int main(int argc, char **argv)
 			if (i>=0) {
 				if (verbose) printf("Client %i received %d bytes\n", i,ret);
 				processMsg(i,buf,ret);
-				sendto(sock, &telem, sizeof(telem), 0, (struct sockaddr *)&tmpaddress, addrlen);
 			}
 
-		}
-
-		int ci, cn,
-			cport_nr=22,        /* /dev/ttyAMA0 */
-			bdrate=115200;       /* 115200 baud */
-
-		unsigned char cbuf[512];
-		char cmode[]={'8','N','1',0};
-
-		if (!stop && !RS232_OpenComport(cport_nr, bdrate, cmode)) {
-			cn = RS232_PollComport(cport_nr, cbuf, 512);
-
-		    if(cn > 0)
-		    {
-		      	cbuf[cn] = 0;   /* always put a "null" at the end of a string! */
-		    	uint8_t decodedMessage;
-
-			    for(ci=0; ci < cn; ci++)
-			    {
-			        if(cbuf[ci] < 32)  /* replace unreadable control-codes by dots */
-			        {
-			          cbuf[ci] = '.';
-			        }
-			        decodedMessage = NazaDecoder.decode(cbuf[ci]);
-			    }
-
-			    printf("received %i bytes: %s\n", cn, (char *)cbuf);
-			    switch (decodedMessage)
-			    {
-			      case NAZA_MESSAGE_GPS:
-			        printf("Lat: %lf\n", NazaDecoder.getLat());
-			        printf("Lon: %lf\n", NazaDecoder.getLon());
-			        printf("Alt: %lf\n", NazaDecoder.getGpsAlt());
-			        //printf("Fix: %s\n", NazaDecoder.getFixType());
-			        printf("Sat: %c\n", NazaDecoder.getNumSat());
-			        telem.volt 		= 3.5;
-					telem.amp 		= 16.99;
-					telem.lon 		= NazaDecoder.getLon();
-				    telem.lat 		= NazaDecoder.getLat();
-				    telem.gpsAlt 	= NazaDecoder.getGpsAlt();
-				    telem.spd 		= NazaDecoder.getSpeed();
-				    telem.gpsVsi 	= NazaDecoder.getGpsVsi();
-
-			        break;
-			      case NAZA_MESSAGE_COMPASS:
-			        printf("Heading: %lf\n", NazaDecoder.getHeadingNc());
-			        break;
-			    }
-			   /*
-		      	uint8_t decodedMessage = NazaDecoder.decode(cbuf);
-			    switch (decodedMessage)
-			    {
-			      case NAZA_MESSAGE_GPS:
-			        printf("Lat: %c\n", NazaDecoder.getLat());
-			        printf("Lon: %c\n", NazaDecoder.getLon());
-			        printf("Alt: %c\n", NazaDecoder.getGpsAlt());
-			        printf("Fix: %c\n", NazaDecoder.getFixType());
-			        printf("Sat: %c\n", NazaDecoder.getNumSat());
-			        break;
-			      case NAZA_MESSAGE_COMPASS:
-			        printf("Heading: %c\n", NazaDecoder.getHeadingNc());
-			        break;
-			    }*/
-		    }
-		} else {
-			printf("Can not open comport\n");
 		}
 	}
 
