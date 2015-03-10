@@ -12,16 +12,16 @@ NazaDecoderLib::NazaDecoderLib()
   cs2 = 0;
 }
 
-unsigned char NazaDecoderLib::decodeLong(unsigned char idx, unsigned char mask)
+int NazaDecoderLib::decodeLong(unsigned char idx, unsigned char mask)
 {
   union { unsigned int l; unsigned char b[4]; } val;
   for(int i = 0; i < 4; i++) val.b[i] = payload[idx + i] ^ mask;
   return val.l;
 }
 
-unsigned char NazaDecoderLib::decodeShort(unsigned char idx, unsigned char mask)
+short int NazaDecoderLib::decodeShort(unsigned char idx, unsigned char mask)
 {
-  union { unsigned short int s; unsigned char b[2]; } val;
+  union { ushort int s; unsigned char b[2]; } val;
   for(int i = 0; i < 2; i++) val.b[i] = payload[idx + i] ^ mask;
   return val.s;
 }
@@ -105,8 +105,8 @@ unsigned char NazaDecoderLib::decode(int input)
     {
       unsigned char mask = payload[4];
       mask = (((mask ^ (mask >> 4)) & 0x0F) | ((mask << 3) & 0xF0)) ^ (((mask & 0x01) << 3) | ((mask & 0x01) << 7)); 
-      unsigned short int x = decodeShort(0, mask);
-      unsigned short int y = decodeShort(2, mask);
+      short int x = decodeShort(0, mask);
+      short int y = decodeShort(2, mask);
       if(x > magXMax) magXMax = x;
       if(x < magXMin) magXMin = x;
       if(y > magYMax) magYMax = y;

@@ -63,10 +63,10 @@ class NazaDecoderLib
     int msgLen;
     unsigned char cs1; // checksum #1
     unsigned char cs2; // checksum #2
-    unsigned char magXMin;
-    unsigned char magXMax;
-    unsigned char magYMin;
-    unsigned char magYMax;
+    short int magXMin;
+    short int magXMax;
+    short int magYMin;
+    short int magYMax;
 
     double lon;     // longitude in degree decimal
     double lat;     // latitude in degree decimal
@@ -86,8 +86,8 @@ class NazaDecoderLib
     unsigned char minute;
     unsigned char second;
 
-    unsigned char  decodeLong(unsigned char idx, unsigned char mask);
-    unsigned char  decodeShort(unsigned char idx, unsigned char mask);
+    int  decodeLong(unsigned char idx, unsigned char mask);
+    short int  decodeShort(unsigned char idx, unsigned char mask);
     void     updateCS(int input);
 };
 
