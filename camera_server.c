@@ -202,6 +202,12 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
+	/* Open Com Port  */
+	if(RS232_OpenComport(cport_nr, bdrate, mode))
+	{
+		printf("Can not open comport\n");
+		exit(1);
+	}
 
 	/* Create name. */
 	bzero((char *) &address, sizeof(address));
@@ -284,7 +290,7 @@ int main(int argc, char **argv)
 		unsigned char cbuf[512];
 		char cmode[]={'8','N','1',0};
 
-		if (!stop && !RS232_OpenComport(cport_nr, bdrate, cmode)) {
+		if (!stop) {
 			cn = RS232_PollComport(cport_nr, cbuf, 512);
 
 		    if(cn > 0)
@@ -320,21 +326,6 @@ int main(int argc, char **argv)
 			        printf("Heading: %lf\n", NazaDecoder.getHeadingNc());
 			        break;
 			    }
-			   /*
-		      	uint8_t decodedMessage = NazaDecoder.decode(cbuf);
-			    switch (decodedMessage)
-			    {
-			      case NAZA_MESSAGE_GPS:
-			        printf("Lat: %c\n", NazaDecoder.getLat());
-			        printf("Lon: %c\n", NazaDecoder.getLon());
-			        printf("Alt: %c\n", NazaDecoder.getGpsAlt());
-			        printf("Fix: %c\n", NazaDecoder.getFixType());
-			        printf("Sat: %c\n", NazaDecoder.getNumSat());
-			        break;
-			      case NAZA_MESSAGE_COMPASS:
-			        printf("Heading: %c\n", NazaDecoder.getHeadingNc());
-			        break;
-			    }*/
 		    }
 		} else {
 			printf("Can not open comport\n");
