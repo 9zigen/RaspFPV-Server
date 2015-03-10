@@ -15,6 +15,7 @@
 #include <stdlib.h>         
 #include <string.h>
 #include <math.h>
+#include <stdio.h>
 
 // Uncomment the line below if you want to disable attitude (pitch/roll) sensing. This may be useful when you experience a conflict with another library that also uses the interrupt
 // or on a board that does not support the interrupt used. Note that for Teensy boards attitude sensing will be disabled by default.

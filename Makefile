@@ -2,7 +2,7 @@ CXX=g++
 CXX_OPTS= -Wall -g -O2 -I../ 
 
 CC=cc
-CC_OPTS=-lrt
+CC_OPTS=-lrt -lm -lc -lgcc
 
 INSTALL=install
 
