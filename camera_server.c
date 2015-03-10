@@ -209,8 +209,8 @@ int main(int argc, char **argv)
 
 		unsigned char cbuf[512];
 		char cmode[]={'8','N','1',0};
-		
-	if(RS232_OpenComport(cport_nr, bdrate, mode))
+
+	if(RS232_OpenComport(cport_nr, bdrate, cmode))
 	{
 		printf("Can not open comport\n");
 		exit(1);
