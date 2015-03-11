@@ -73,6 +73,14 @@ int ci, cn,
 unsigned char cbuf[512];
 char cmode[]={'8','N','1',0};
 
+double deg2rad(double deg) {
+  return (deg * pi / 180);
+}
+
+double rad2deg(double rad) {
+  return (rad * 180 / pi);
+}
+
 char** str_split(char* a_str, const char a_delim) {
     char** result = 0;
     size_t count = 0;
@@ -255,7 +263,6 @@ void recvNaza() {
 
 void setHomeVars()
 {
-    float dstlon, dstlat;
     long bearing;
     
     if(telem.gotHome == 0 && telem.fixType > 2){

@@ -60,11 +60,3 @@ void unpack_lm(unsigned char *buf,struct local_msg *m) {
 	m->t = buf[1];
 	m->v = unpacki16(buf+2);
 }
-
-double deg2rad(double deg) {
-  return (deg * pi / 180);
-}
-
-double rad2deg(double rad) {
-  return (rad * 180 / pi);
-}
