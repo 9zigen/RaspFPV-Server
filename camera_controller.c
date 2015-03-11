@@ -215,13 +215,13 @@ void recvNaza() {
                     printf("Sat: %d\n", NazaDecoder.getNumSat());
                     printf("Hdop: %lf\n", NazaDecoder.getHdop());
                     printf("Vdop: %lf\n", NazaDecoder.getVdop());
-                    
-                    printf("Year: %lf\n", NazaDecoder.getYear());
-                    printf("Month: %lf\n", NazaDecoder.getMonth());
-                    printf("Day: %lf\n", NazaDecoder.getDay());
-                    printf("Hour: %lf\n", NazaDecoder.getHour());
-                    printf("Minute: %lf\n", NazaDecoder.getMinute());
-                    printf("Second: %lf\n", NazaDecoder.getSecond());
+
+                    printf("Year: %d\n", NazaDecoder.getYear());
+                    printf("Month: %d\n", NazaDecoder.getMonth());
+                    printf("Day: %d\n", NazaDecoder.getDay());
+                    printf("Hour: %d\n", NazaDecoder.getHour());
+                    printf("Minute: %d\n", NazaDecoder.getMinute());
+                    printf("Second: %d\n", NazaDecoder.getSecond());
                 }
                 
                 telem.lon       = NazaDecoder.getLon();
