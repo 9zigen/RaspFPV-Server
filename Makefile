@@ -17,10 +17,10 @@ all: $(OBJS)
 install:
 	$(INSTALL) -m 0755 -d $(DESTDIR)/etc/init.d
 	$(INSTALL) -m 0755 -d $(DESTDIR)/usr/local/bin
-	$(INSTALL) -m 755 camera $(DESTDIR)/usr/local/bin/
+	$(INSTALL) -m 755 camera_controller $(DESTDIR)/usr/local/bin/
 	$(INSTALL) -m 755 camera.sh $(DESTDIR)/usr/local/bin/
 	$(INSTALL) -m 755 utils/ioscamera $(DESTDIR)/etc/init.d/
 
 clean:
-	rm -rf camera_server
+	rm -rf camera_controller
 	rm -rf *.o

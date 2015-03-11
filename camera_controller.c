@@ -224,9 +224,7 @@ void recvNaza() {
 }
 
 void recvMsgs() {
-    static int sel = 0, i = 0, ret = 0;
-    static unsigned char buf[4];
-    static struct avr_msg m;
+    static int sel = 0;
 
     static fd_set fds;
     static struct timeval timeout;
