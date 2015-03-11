@@ -179,7 +179,7 @@ const char * handle_packet(char * data, sockaddr_in remoteAddr) {
         }
     } else if (strcmp(tokens[0], "querystatus") == 0) {
         // yaw pitch roll altitudetarget altitude recording
-        //snprintf(resp, 255, "status %s %2.2f %2.2f %2.2f %i %i %i %i %i %i %i", tokens[1], avr_s[LOG_QUATERNION_YAW] / 100.0f, avr_s[LOG_QUATERNION_PITCH] / 100.0f, avr_s[LOG_QUATERNION_ROLL] / 100.0f, avr_s[LOG_ALTITUDE_HOLD_TARGET], avr_s[LOG_ALTITUDE], recording, avr_s[LOG_MOTOR_FL], avr_s[LOG_MOTOR_BL], avr_s[LOG_MOTOR_BR], avr_s[LOG_MOTOR_FR]);
+        //snprintf(resp, 255, "status %.6f %.6f %.6f %.6f %i %i %i %i %i %i", telem.lon, telem.lat, telem.gpsAlt, telem.spd, telem.gpsVsi, avr_s[LOG_ALTITUDE], recording, avr_s[LOG_MOTOR_FL], avr_s[LOG_MOTOR_BL], avr_s[LOG_MOTOR_BR], avr_s[LOG_MOTOR_FR]);
         return resp;
     }
     snprintf(resp, 255, "OK %s", tokens[1]);
@@ -208,6 +208,7 @@ void recvNaza() {
                 printf("Lon: %lf\n", NazaDecoder.getLon());
                 printf("Alt: %lf\n", NazaDecoder.getGpsAlt());
                 printf("Spd: %lf\n", NazaDecoder.getSpeed());
+                printf("Vsi: %lf\n", NazaDecoder.getGpsVsi();
                 //printf("Fix: %s\n", NazaDecoder.getFixType());
                 printf("Sat: %d\n", NazaDecoder.getNumSat());
                 telem.lon       = NazaDecoder.getLon();
