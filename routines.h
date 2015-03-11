@@ -5,8 +5,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <math.h>
 
 extern int verbose;
+
+#define pi 3.14159265358979323846;
 
 /*
 ** packi16() -- store a 16-bit int into a char buffer (like htons())
@@ -47,5 +50,9 @@ void unpack_lm(unsigned char *buf,struct local_msg *m);
 
 void local2avr(struct local_msg *lm, struct avr_msg *am);
 void avr2local(struct avr_msg *am, struct local_msg *lm);
+
+/* Convertion */
+double deg2rad(double deg);
+double rad2deg(double rad);
 
 #endif

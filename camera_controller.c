@@ -18,6 +18,8 @@
 #include "NazaDecoderLib.h"
 #include <stdio.h>
 
+#define pi 3.14159265358979323846;
+
 int ret;
 int err = 0;
 int stop = 0;
@@ -52,7 +54,16 @@ struct Telemetry
 	    double gpsAlt;  // altitude in m (from GPS)
 	    double spd;     // speed in m/s
 	    double gpsVsi;  // vertical speed indicator (from GPS) in m/s (a.k.a. climb speed)
-	    double head;	// heading
+	    double heading;	// heading
+        bool gotHome;   // Have Home point
+        double hDop;    // horizontal dilution of precision
+        double vDop;    // vertical dilution of precision
+        char fixType;
+        double altHome;
+        double homeDistance;
+        double homeLat;
+        double homeLon;
+        int homeDirection;
 	} telem;
 
 int ci, cn,
@@ -229,12 +240,55 @@ void recvNaza() {
                 telem.gpsAlt    = NazaDecoder.getGpsAlt();
                 telem.spd       = NazaDecoder.getSpeed();
                 telem.gpsVsi    = NazaDecoder.getGpsVsi();
+                telem.fixType   = (char) NazaDecoder.getFixType();
+                telem.hDop      = NazaDecoder.getHdop();
+                telem.vDop      = NazaDecoder.getVdop();
                 break;
             case NAZA_MESSAGE_COMPASS:
                 if (verbose) { printf("Heading: %lf\n", NazaDecoder.getHeadingNc()); }
+                telem.heading = NazaDecoder.getHeadingNc();
 
                 break;
         }
+    }
+}
+
+void setHomeVars()
+{
+    float dstlon, dstlat;
+    long bearing;
+    
+    if(telem.gotHome == 0 && telem.fixType > 2){
+        telem.homeLat = telem.lat;
+        telem.homeLon = telem.lon;
+        telem.gotHome = 1;
+        
+        if (telem.vDop < 4) {
+            telem.altHome = telem.gpsAlt;
+        }
+    }
+    else if(telem.gotHome == 1){
+        // DST to HOME
+        double theta, dist, head, bearing;
+
+        theta = telem.homeLon - telem.lon;
+        dist = sin(deg2rad(telem.homeLat)) * sin(deg2rad(telem.lat)) + cos(deg2rad(telem.homeLat)) * cos(deg2rad(telem.lat)) * cos(deg2rad(theta));
+        dist = acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515 * 1.609344; // Kilometers
+        telem.homeDistance = dist;
+        if (verbose) { printf("Home Distance: %lf\n", telem.homeDistance); }
+
+        //DIR to Home
+        head = atan2((sin(deg2rad(theta)) * cos(deg2rad(telem.lat))), ((cos(deg2rad(telem.homeLat)) * sin(deg2rad(telem.lat))) - (sin(deg2rad(telem.homeLat)) * cos(deg2rad(telem.lat)) * cos(deg2rad(theta)))));
+        bearing = (head * 180)/pi;
+        if(bearing <= 0)
+        {
+            bearing = bearing + 360;
+        }
+        telem.homeDirection = bearing;
+        if (verbose) { printf("Absolute Home Direction: %i\n", telem.homeDirection); }
+        if (verbose) { printf("Relative Home Direction: %lf\n", telem.homeDirection - telem.heading); }
     }
 }
 
