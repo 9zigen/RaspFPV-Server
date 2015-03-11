@@ -361,6 +361,7 @@ void loop() {
         }
 
         recvNaza();
+        setHomeVars();
         recvMsgs();
         usleep(100000);
     }
