@@ -17,10 +17,6 @@
 #include "NazaDecoderLib.h"
 #include <stdio.h>
 
-#ifndef ATTITUDE_SENSING_DISABLED
-	uint32_t currTime, attiTime;
-#endif
-
 #define CAM_CMD "/usr/local/bin/camera_streamer.sh"
 char cam_cmd[128];
 int verbose;
@@ -32,7 +28,6 @@ int portno = 1035;
 #define MAX_CLIENTS 5
 #define CLIENT_TIMEOUT 10
 struct sockaddr_in raddress[MAX_CLIENTS];
-int clients[MAX_CLIENTS];
 int sock;
 struct sockaddr_in tmpaddress;
 socklen_t addrlen = sizeof(tmpaddress);
@@ -192,10 +187,6 @@ int main(int argc, char **argv)
 	signal(SIGTERM, catch_signal);
 	signal(SIGINT, catch_signal);
 
-	sock = 0;
-	for (i=0;i<MAX_CLIENTS;i++)
-		clients[i] = 0;
-
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sock < 0) {
 		perror("opening socket");
@@ -312,7 +303,7 @@ int main(int argc, char **argv)
 			        printf("Alt: %lf\n", NazaDecoder.getGpsAlt());
 			        printf("Spd: %lf\n", NazaDecoder.getSpeed());
 			        //printf("Fix: %s\n", NazaDecoder.getFixType());
-			        printf("Sat: %c\n", NazaDecoder.getNumSat());
+			        printf("Sat: %d\n", NazaDecoder.getNumSat());
 			        telem.volt 		= 3.5;
 					telem.amp 		= 16.99;
 					telem.lon 		= NazaDecoder.getLon();
@@ -327,8 +318,6 @@ int main(int argc, char **argv)
 			        break;
 			    }
 		    }
-		} else {
-			printf("Can not open comport\n");
 		}
 	}
 
