@@ -49,4 +49,7 @@ void unpack_lm(unsigned char *buf,struct local_msg *m);
 void local2avr(struct local_msg *lm, struct avr_msg *am);
 void avr2local(struct avr_msg *am, struct local_msg *lm);
 
+double deg2rad(double deg);
+double rad2deg(double rad);
+
 #endif

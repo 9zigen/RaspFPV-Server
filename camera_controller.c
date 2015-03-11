@@ -18,8 +18,6 @@
 #include "NazaDecoderLib.h"
 #include <stdio.h>
 
-#define pi 3.14159265358979323846;
-
 int ret;
 int err = 0;
 int stop = 0;
@@ -72,14 +70,6 @@ int ci, cn,
 
 unsigned char cbuf[512];
 char cmode[]={'8','N','1',0};
-
-double deg2rad(double deg) {
-  return (deg * pi / 180);
-}
-
-double rad2deg(double rad) {
-  return (rad * 180 / pi);
-}
 
 char** str_split(char* a_str, const char a_delim) {
     char** result = 0;
@@ -288,7 +278,7 @@ void setHomeVars()
 
         //DIR to Home
         head = atan2((sin(deg2rad(theta)) * cos(deg2rad(telem.lat))), ((cos(deg2rad(telem.homeLat)) * sin(deg2rad(telem.lat))) - (sin(deg2rad(telem.homeLat)) * cos(deg2rad(telem.lat)) * cos(deg2rad(theta)))));
-        bearing = (head * 180)/pi;
+        bearing = (head * 180)/M_PI;
         if(bearing <= 0)
         {
             bearing = bearing + 360;
