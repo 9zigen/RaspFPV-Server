@@ -204,13 +204,19 @@ void recvNaza() {
         switch (decodedMessage)
         {
             case NAZA_MESSAGE_GPS:
-                printf("Lat: %lf\n", NazaDecoder.getLat());
-                printf("Lon: %lf\n", NazaDecoder.getLon());
-                printf("Alt: %lf\n", NazaDecoder.getGpsAlt());
-                printf("Spd: %lf\n", NazaDecoder.getSpeed());
-                printf("Vsi: %lf\n", NazaDecoder.getGpsVsi();
-                //printf("Fix: %s\n", NazaDecoder.getFixType());
-                printf("Sat: %d\n", NazaDecoder.getNumSat());
+                if (verbose) {
+                    printf("Lat: %lf\n", NazaDecoder.getLat());
+                    printf("Lon: %lf\n", NazaDecoder.getLon());
+                    printf("Alt: %lf\n", NazaDecoder.getGpsAlt());
+                    printf("Spd: %lf\n", NazaDecoder.getSpeed());
+                    printf("Vsi: %lf\n", NazaDecoder.getGpsVsi());
+                    printf("Cog: %lf\n", NazaDecoder.getCog());
+                    printf("Fix: %d\n", (char) NazaDecoder.getFixType());
+                    printf("Sat: %d\n", NazaDecoder.getNumSat());
+                    printf("Hdop: %lf\n", NazaDecoder.getHdop());
+                    printf("Vdop: %lf\n", NazaDecoder.getVdop());
+                }
+                
                 telem.lon       = NazaDecoder.getLon();
                 telem.lat       = NazaDecoder.getLat();
                 telem.gpsAlt    = NazaDecoder.getGpsAlt();
@@ -218,7 +224,8 @@ void recvNaza() {
                 telem.gpsVsi    = NazaDecoder.getGpsVsi();
                 break;
             case NAZA_MESSAGE_COMPASS:
-                printf("Heading: %lf\n", NazaDecoder.getHeadingNc());
+                if (verbose) { printf("Heading: %lf\n", NazaDecoder.getHeadingNc()); }
+
                 break;
         }
     }
