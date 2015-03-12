@@ -16,6 +16,7 @@
 #include "rs232.h"
 #include "routines.h"
 #include "NazaDecoderLib.h"
+#include "spi.h"
 #include <stdio.h>
 
 int ret;
@@ -33,7 +34,7 @@ int verbose = 0;
 int yprt[4] = {0, 0, 0, 0};
 
 long dt_ms = 0;
-static struct timespec ts, t1, t2, t3, *dt, lastPacketTime;
+static struct timespec ts, t1, t2, t3, t4, *dt, lastPacketTime;
 
 int recording = 0;
 
@@ -43,10 +44,27 @@ int logmode = 0;
 
 #define FIXED_HEIGHT 240
 
+static const int ADC_MAX = 1023; // 10bit ADC
+static const double DEFAULT_SENSOR_MAX_VOLTS = 51.8;
+static const double DEFAULT_SENSOR_MAX_AMPS = 89.4;
+static const void * NO_SPI = (void*)1;
+
+struct AnalogTelemetry {
+    SPIInterface *spi;
+    int spi_bus;
+    int spi_device;
+
+    int voltage_channel;
+    int current_channel;
+
+    double max_volts;
+    double max_amps;
+};
+
 struct Telemetry
 	{
-		float volt;		// voltage, analog read (TODO)
-		float amp;		// amperage, analog read (TODO)
+		double volt;	// voltage, analog read SPI (mcp3002)
+		double amp;		// amperage, analog read SPI (mcp3002)
 		double lon;     // longitude in degree decimal
 	    double lat;     // latitude in degree decimal
 	    double gpsAlt;  // altitude in m (from GPS)
@@ -187,14 +205,80 @@ const char * handle_packet(char * data, sockaddr_in remoteAddr) {
             recording = 2;
         }
     } else if (strcmp(tokens[0], "querystatus") == 0) {
+        clock_gettime(CLOCK_REALTIME, &t4);
+        dt = TimeSpecDiff(&t4, &lastPacketTime);
+        dt_ms = dt->tv_sec * 1000 + dt->tv_nsec / 1000000;
+        if (dt_ms > 2500) {
+            snprintf(resp, 255, "status gps %.6f %.6f %.6f %.6f %.6f", telem.lon, telem.lat, telem.gpsAlt, telem.spd, telem.gpsVsi);
+        }
         // yaw pitch roll altitudetarget altitude recording
-        //snprintf(resp, 255, "status %.6f %.6f %.6f %.6f %i %i %i %i %i %i", telem.lon, telem.lat, telem.gpsAlt, telem.spd, telem.gpsVsi, avr_s[LOG_ALTITUDE], recording, avr_s[LOG_MOTOR_FL], avr_s[LOG_MOTOR_BL], avr_s[LOG_MOTOR_BR], avr_s[LOG_MOTOR_FR]);
+        //snprintf(resp, 255, "status %.6f %.6f %.6f %.6f %i %i %i %i %i %i", telem.lon, telem.lat, telem.gpsAlt, telem.spd, telem.gpsVsi);
         return resp;
     }
     snprintf(resp, 255, "OK %s", tokens[1]);
 
     return resp;
 }
+
+struct AnalogTelemetry * at = (AnalogTelemetry*)calloc(1, sizeof(AnalogTelemetry));
+
+AnalogTelemetry * newSPI() {
+    at->spi_bus = 0;
+    at->spi_device = 0;
+    at->voltage_channel = 0;
+    at->current_channel = 1;
+    at->max_amps = DEFAULT_SENSOR_MAX_AMPS;
+    at->max_volts = DEFAULT_SENSOR_MAX_VOLTS;
+    return at;
+}
+
+int setSPI(AnalogTelemetry * at, int bus, int device) {
+    if ( at->spi && at->spi != NO_SPI ) {
+        spi_dispose(at->spi);
+    }
+    at->spi_bus = bus;
+    at->spi_device = device;
+    at->spi = spi_new(bus, device);
+    if ( !at->spi ) {
+        at->spi = (SPIInterface*)NO_SPI;
+        fprintf(stderr, "SPI-based telemetry transmission will be disabled\n");
+        return 0;
+    }
+    return 1;
+}
+
+static double SpiReadChannel(AnalogTelemetry * at, int channel) {
+    if ( at->spi == NO_SPI ) return 0.0;
+
+    if ( !at->spi ) {
+        at->spi = spi_new(at->spi_bus, at->spi_device);
+        if ( !at->spi ) {
+            fprintf(stderr, "SPI-based telemetry transmission will be disabled\n");
+            at->spi = (SPIInterface*)NO_SPI;
+            return 0.0;
+        }
+    }
+
+    uint8_t outbuf[3];
+    uint8_t inbuf[3] = {1, (8+channel) << 4, 0};
+    spi_transaction(at->spi, inbuf, outbuf, sizeof(outbuf));
+    int output = ((outbuf[1] & 3) << 8) + outbuf[2];
+    return (double)output / (double)ADC_MAX;
+}
+
+void recvSPI() {
+    double voltage = SpiReadChannel(at, at->voltage_channel) / at->max_volts;
+    double current = SpiReadChannel(at, at->current_channel) / at->max_amps;
+    telem.volt = voltage;
+    telem.amp = current;
+
+    if (verbose) {
+        printf("Voltage: %lf\n", voltage);
+        printf("Current: %lf\n", current);
+    }
+}
+
+
 
 void recvNaza() {
     cn = RS232_PollComport(cport_nr, cbuf, 512);
@@ -360,6 +444,7 @@ void loop() {
             lastPacketTime = t2;
         }
 
+        recvSPI();
         recvNaza();
         setHomeVars();
         recvMsgs();
@@ -431,6 +516,9 @@ int main(int argc, char **argv) {
         printf("Can not open comport\n");
         exit(EXIT_FAILURE);
     }
+
+    // set up SPI
+    newSPI();
 
     // run as daemon
     if (background) {
