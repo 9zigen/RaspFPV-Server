@@ -1,12 +1,4 @@
 #include "spi.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <linux/spi/spidev.h>
-#include <linux/types.h>
-#include <sys/ioctl.h>
-#include <errno.h>
-#include <string.h>
 
 struct _SPIInterface {
     int fd;
