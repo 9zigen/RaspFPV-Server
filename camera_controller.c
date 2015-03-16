@@ -559,6 +559,11 @@ int main(int argc, char **argv) {
             sleep(2);
     }
     close(sock);
+
+    char cmd[256];
+    memset(cmd, '\0', 256);
+    sprintf(cmd, "%s %s %s &", CAMERA_CMD, "stream", "stop");
+    
     if (verbose) printf("Closing.\n");
     exit(EXIT_SUCCESS);
 }
