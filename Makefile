@@ -18,7 +18,7 @@ install:
 	$(INSTALL) -m 0755 -d $(DESTDIR)/etc/init.d
 	$(INSTALL) -m 0755 -d $(DESTDIR)/usr/local/bin
 	$(INSTALL) -m 755 camera_controller $(DESTDIR)/usr/local/bin/
-	$(INSTALL) -m 755 camera.sh $(DESTDIR)/usr/local/bin/
+	$(INSTALL) -m 755 utils/camera.sh $(DESTDIR)/usr/local/bin/
 	$(INSTALL) -m 755 utils/camera_controller.init $(DESTDIR)/etc/init.d/camera_controller
 
 uninstall:

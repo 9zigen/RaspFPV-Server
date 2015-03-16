@@ -8,11 +8,6 @@ video_height=720
 photo_width=2592
 photo_height=1944
 
-#/usr/bin/raspivid  -vf -hf -w $video_width -h $video_height -fps 25 -b 5000000 -t 0 -g 20 -n -ex auto -o - | \
-#gst-launch-1.0 -v fdsrc ! tee name=tp \
-#tp. ! queue ! h264parse ! videorate ! 'video/x-raw-yuv,framerate=10/1' ! videoscale ! 'video/x-raw-yuv,width=640,height=480' ! x264enc pass=qual quantizer=20 tune=zerolatency ! rtph264pay config-interval=1 pt=96 ! udpsink port=$4 host=$3 \
-#tp. ! queue ! filesink location=/rpicopter/cam/video-$3.h264
-
 [ -e $PIDFile ] && read PID <$PIDFile || PID=""
 PID="$(pidof  raspivid)"
 [ -e $StreamingStatusFile ] && read SS <$StreamingStatusFile || SS=""
@@ -35,11 +30,6 @@ resumeStreaming() {
 		$0 stream start $SS
 	fi
 }
-
-toggleRecordPause() {
-	kill -USR1 $PID
-}
-
 killRaspivid() {
 	kill $PID
 	rm $PIDFile
@@ -54,18 +44,20 @@ case "$1" in
 				w=$5
 				h=$6
 				if [ -z $w ]; then
-						w=320
+						w=640
 				fi
 				if [ -z $h ]; then
-						h=240
+						h=480
 				fi
 
-				echo "Start STREAMING"
+				if [ ! -e "$StreamingStatusFile" ]; then
+					echo "Start STREAMING"
 
-				/usr/bin/raspivid -vf -w $w -h $h -fps 10 -b 400000 -t 0 -g 20 -n -ex auto -o - | gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=1 pt=96 ! udpsink port=$4 host=$3 &
-				PID=$!
-				echo $PID > $PIDFile
-				echo $3 $4 $w $h > $StreamingStatusFile
+					/usr/bin/raspivid -vf -w $w -h $h -fps 49 -b 2500000 -t 0 -n -pf base -o - | gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=1 pt=96 ! udpsink port=$4 host=$3 &
+					PID=$!
+					echo $PID > $PIDFile
+					echo $3 $4 $w $h > $StreamingStatusFile
+				fi
 				;;
 			stop)
 				echo "Stop STREAMING"
@@ -81,35 +73,35 @@ case "$1" in
 	video)
 		case "$2" in
 			record)
+				ts=`date +%s`
+				w=$5
+				h=$6
+				if [ -z $w ]; then
+						w=640
+				fi
+				if [ -z $h ]; then
+						h=480
+				fi
+
 				pauseStreaming
+
 				if [ -z "$PID" ]; then
-					# TODO use tee in gstreamer to save to file and stream at same time
 					echo "Start RECORDING"
-					/usr/bin/raspivid -o /rpicopter/cam/video-$3.h264 -vf -hf -w $video_width -h $video_height -fps 25 -b 5000000 -t 0 --signal &
+				
+					/usr/bin/raspivid -vf -w $w -h $h -fps 49 -b 2500000 -t 0 -n -pf base -o - | tee /rpicopter/cam/video-$ts.h264 | gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=1 pt=96 ! udpsink port=$4 host=$3 &
 					PID=$!
 					echo $PID > $PIDFile
-				else
-					# resume from pause
-					echo "Resume RECORDING"
-					toggleRecordPause
+					echo $3 $4 $w $h > $RecordStatusFile
 				fi
-				echo $2 > $RecordStatusFile
 				;;
-
 			stop)
 				echo "Stop RECORDING"
 				killRaspivid
 				resumeStreaming
 				rm $RecordStatusFile
 				;;
-
-			pause)
-				echo "Pause RECORDING"
-				toggleRecordPause
-				echo $2 > $RecordStatusFile
-				;;
 			*)
-				echo "Usage $0 $1 {record|stop|pause} [file-suffix]"
+				echo "Usage $0 $1 {record|stop} host port [width] [height]"
 				;;
 		esac
 	;;
