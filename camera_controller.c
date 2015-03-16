@@ -563,6 +563,7 @@ int main(int argc, char **argv) {
     char cmd[256];
     memset(cmd, '\0', 256);
     sprintf(cmd, "%s %s %s &", CAMERA_CMD, "stream", "stop");
+    system(cmd);
     
     if (verbose) printf("Closing.\n");
     exit(EXIT_SUCCESS);
