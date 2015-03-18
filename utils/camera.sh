@@ -61,7 +61,9 @@ case "$1" in
 				;;
 			stop)
 				echo "Stop STREAMING"
-				rm $StreamingStatusFile
+				if [ -e "$StreamingStatusFile" ]; then
+					rm $StreamingStatusFile
+				fi
 				killRaspivid
 				;;
 			*)
