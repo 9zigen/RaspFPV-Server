@@ -224,8 +224,9 @@ const char * handle_packet(char * data, sockaddr_in remoteAddr) {
     return resp;
 }
 
+struct AnalogTelemetry * at = (AnalogTelemetry*)calloc(1, sizeof(AnalogTelemetry));
+
 AnalogTelemetry * newSPI() {
-    AnalogTelemetry * at = (AnalogTelemetry*)calloc(1, sizeof(AnalogTelemetry));
     at->spi_bus = 0;
     at->spi_device = 0;
     at->voltage_channel = 0;
@@ -522,7 +523,6 @@ int main(int argc, char **argv) {
 
     // set up SPI
     newSPI();
-    setSPI(0,0);
 
     // run as daemon
     if (background) {
@@ -559,7 +559,6 @@ int main(int argc, char **argv) {
             sleep(2);
     }
     close(sock);
-    spi_dispose(at);
 
     char cmd[256];
     memset(cmd, '\0', 256);
