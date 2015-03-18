@@ -264,7 +264,7 @@ static double SpiReadChannel(AnalogTelemetry * at, int channel) {
     }
 
     uint8_t outbuf[3];
-    uint8_t inbuf[3] = {1, (8+channel) << 4, 0};
+    uint8_t inbuf[3] = {1, (2+channel) << 6, 0};
     spi_transaction(at->spi, inbuf, outbuf, sizeof(outbuf));
     int output = ((outbuf[1] & 3) << 8) + outbuf[2];
     return (double)output / (double)ADC_MAX;
