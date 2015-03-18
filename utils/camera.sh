@@ -64,7 +64,9 @@ case "$1" in
 				if [ -e "$StreamingStatusFile" ]; then
 					rm $StreamingStatusFile
 				fi
-				killRaspivid
+				if [ -z "$PID" ]; then
+					killRaspivid
+				fi
 				;;
 			*)
 				echo "Usage $0 $1 {start|stop} host port [width] [height]"

@@ -34,7 +34,7 @@ int verbose = 0;
 int yprt[4] = {0, 0, 0, 0};
 
 long dt_ms = 0;
-static struct timespec ts, t1, t2, t3, t4, *dt, lastPacketTime;
+static struct timespec ts, t1, t2, t3, t4, t5, adc, *dt, lastPacketTime;
 
 int recording = 0;
 
@@ -267,18 +267,28 @@ static double SpiReadChannel(AnalogTelemetry * at, int channel) {
     uint8_t inbuf[3] = {1, (2+channel) << 6, 0};
     spi_transaction(at->spi, inbuf, outbuf, sizeof(outbuf));
     int output = ((outbuf[1] & 3) << 8) + outbuf[2];
+    if (verbose) {
+        printf("ADC: %i, %i, %i \n", outbuf[0], outbuf[1], outbuf[2]);
+    }
     return (double)output / (double)ADC_MAX;
 }
 
 void recvSPI() {
-    double voltage = SpiReadChannel(at, at->voltage_channel) / at->max_volts;
-    double current = SpiReadChannel(at, at->current_channel) / at->max_amps;
-    telem.volt = voltage;
-    telem.amp = current;
 
-    if (verbose) {
-        printf("Voltage: %lf\n", voltage);
-        printf("Current: %lf\n", current);
+    clock_gettime(CLOCK_REALTIME, &t5);
+    dt = TimeSpecDiff(&t5, &adc);
+    dt_ms = dt->tv_sec * 1000 + dt->tv_nsec / 1000000;
+    if (dt_ms > 3000) {
+        &adc = &t5;
+        double voltage = SpiReadChannel(at, at->voltage_channel) * at->max_volts;
+        double current = SpiReadChannel(at, at->current_channel) * at->max_amps;
+        telem.volt = voltage;
+        telem.amp = current;
+
+        if (verbose) {
+            printf("Voltage: %lf\n", voltage);
+            printf("Current: %lf\n", current);
+        }
     }
 }
 
