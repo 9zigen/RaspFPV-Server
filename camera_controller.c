@@ -279,7 +279,7 @@ void recvSPI() {
     dt = TimeSpecDiff(&t5, &adc);
     dt_ms = dt->tv_sec * 1000 + dt->tv_nsec / 1000000;
     if (dt_ms > 3000) {
-        &adc = &t5;
+        adc = t5;
         double voltage = SpiReadChannel(at, at->voltage_channel) * at->max_volts;
         double current = SpiReadChannel(at, at->current_channel) * at->max_amps;
         telem.volt = voltage;
