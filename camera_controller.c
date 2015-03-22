@@ -212,8 +212,11 @@ const char * handle_packet(char * data, sockaddr_in remoteAddr) {
         clock_gettime(CLOCK_REALTIME, &t4);
         dt = TimeSpecDiff(&t4, &lastPacketTime);
         dt_ms = dt->tv_sec * 1000 + dt->tv_nsec / 1000000;
+        if (dt_ms > 1000) {
+            snprintf(resp, 255, "status analog %s %.6f %.6f", tokens[1], telem.volt, telem.amp);
+        }
         if (dt_ms > 2500) {
-            snprintf(resp, 255, "status gps %.6f %.6f %.6f %.6f %.6f", telem.lon, telem.lat, telem.gpsAlt, telem.spd, telem.gpsVsi);
+            snprintf(resp, 255, "status gps %s %.6f %.6f %.6f %.6f %.6f", tokens[1], telem.lon, telem.lat, telem.gpsAlt, telem.spd, telem.gpsVsi);
         }
         // yaw pitch roll altitudetarget altitude recording
         //snprintf(resp, 255, "status %.6f %.6f %.6f %.6f %i %i %i %i %i %i", telem.lon, telem.lat, telem.gpsAlt, telem.spd, telem.gpsVsi);
@@ -278,14 +281,14 @@ void recvSPI() {
     clock_gettime(CLOCK_REALTIME, &t5);
     dt = TimeSpecDiff(&t5, &adc);
     dt_ms = dt->tv_sec * 1000 + dt->tv_nsec / 1000000;
-    if (dt_ms > 3000) {
-        adc = t5;
-        double voltage = SpiReadChannel(at, at->voltage_channel) * at->max_volts;
-        double current = SpiReadChannel(at, at->current_channel) * at->max_amps;
-        telem.volt = voltage;
-        telem.amp = current;
+    
+    double voltage = SpiReadChannel(at, at->voltage_channel) * at->max_volts;
+    double current = SpiReadChannel(at, at->current_channel) * at->max_amps;
+    telem.volt = voltage;
+    telem.amp = current;
 
-        if (verbose) {
+    if (verbose) {
+        if (dt_ms > 3000) {
             printf("Voltage: %lf\n", voltage);
             printf("Current: %lf\n", current);
         }
