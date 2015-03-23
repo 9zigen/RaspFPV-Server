@@ -208,18 +208,11 @@ const char * handle_packet(char * data, sockaddr_in remoteAddr) {
             ret = system(cmd);
             recording = 2;
         }
-    } else if (strcmp(tokens[0], "querystatus") == 0) {
-        clock_gettime(CLOCK_REALTIME, &t4);
-        dt = TimeSpecDiff(&t4, &lastPacketTime);
-        dt_ms = dt->tv_sec * 1000 + dt->tv_nsec / 1000000;
-        if (dt_ms > 1000) {
-            snprintf(resp, 255, "status analog %s %.6f %.6f", tokens[1], telem.volt, telem.amp);
-        }
-        if (dt_ms > 2500) {
-            snprintf(resp, 255, "status gps %s %.6f %.6f %.6f %.6f %.6f", tokens[1], telem.lon, telem.lat, telem.gpsAlt, telem.spd, telem.gpsVsi);
-        }
-        // yaw pitch roll altitudetarget altitude recording
-        //snprintf(resp, 255, "status %.6f %.6f %.6f %.6f %i %i %i %i %i %i", telem.lon, telem.lat, telem.gpsAlt, telem.spd, telem.gpsVsi);
+    } else if (strcmp(tokens[0], "querygps") == 0) {
+        snprintf(resp, 255, "status gps %s %.6f %.6f %.6f %.6f %.6f", tokens[1], telem.lon, telem.lat, telem.gpsAlt, telem.spd, telem.gpsVsi);
+        return resp;
+    } else if (strcmp(tokens[0], "queryadc") == 0) {
+        snprintf(resp, 255, "status analog %s %.6f %.6f", tokens[1], telem.volt, telem.amp);
         return resp;
     }
     snprintf(resp, 255, "OK %s", tokens[1]);
