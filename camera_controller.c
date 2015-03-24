@@ -296,7 +296,7 @@ void recvSPI() {
 
     if (verbose >= 2) {
         if (dt_ms > 3000) {
-            adc = t5
+            adc = t5;
             printf("Voltage: %lf\n", voltage);
             printf("Current: %lf\n", current);
         }
