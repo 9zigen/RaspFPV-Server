@@ -157,7 +157,7 @@ const char * handle_packet(char * data, sockaddr_in remoteAddr) {
 
             char cmd[256];
             memset(cmd, '\0', 256);
-            sprintf(cmd, "%s %s %s %s %s %i %i &", CAMERA_CMD, tokens[0], tokens[2], ip, tokens[3], tokens[4], tokens[5]);
+            sprintf(cmd, "%s %s %s %s %s %s %s &", CAMERA_CMD, tokens[0], tokens[2], ip, tokens[3], tokens[4], tokens[5]);
             if (verbose) printf("Executing: %s\n", cmd);
             ret = system(cmd);
 
