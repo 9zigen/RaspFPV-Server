@@ -49,7 +49,7 @@ static const double DEFAULT_SENSOR_MAX_VOLTS = 51.8;
 static const double DEFAULT_SENSOR_MAX_AMPS = 89.4;
 static const void * NO_SPI = (void*)1;
 
-#define ANALOG_SAMPLES 10
+#define ANALOG_SAMPLES 50
 
 struct AnalogTelemetry {
     SPIInterface *spi;
@@ -152,28 +152,37 @@ const char * handle_packet(char * data, sockaddr_in remoteAddr) {
     if (strcmp(tokens[0], "hello") == 0) {
 
     } else if (strcmp(tokens[0], "stream") == 0) {
-        char *ip = inet_ntoa(remoteAddr.sin_addr);
+        if (strcmp(tokens[2], "start") == 0) {
+            char *ip = inet_ntoa(remoteAddr.sin_addr);
 
-        // handle aspect ratio
-        float aspectratio = atof(tokens[4]) / atof(tokens[5]);
-        int height = FIXED_HEIGHT;
-        int width = (aspectratio * height);
+            char cmd[256];
+            memset(cmd, '\0', 256);
+            sprintf(cmd, "%s %s %s %s %s %i %i &", CAMERA_CMD, tokens[0], tokens[2], ip, tokens[3], tokens[4], tokens[5]);
+            if (verbose) printf("Executing: %s\n", cmd);
+            ret = system(cmd);
 
-        char cmd[256];
-        memset(cmd, '\0', 256);
-        sprintf(cmd, "%s %s %s %s %s %i %i &", CAMERA_CMD, tokens[0], tokens[2], ip, tokens[3], width, height);
-        if (verbose) printf("Executing: %s\n", cmd);
-        ret = system(cmd);
+            if (ret != 0) {
+                snprintf(resp, 255, "KO %s %s", tokens[1], tokens[2]);
+                return resp;
+            } else {
+                snprintf(resp, 255, "OK %s %s", tokens[1], tokens[2]);
+                return resp;
+            }
+        } else if (strcmp(tokens[2], "stop") == 0) {
+            char cmd[256];
+            memset(cmd, '\0', 256);
+            sprintf(cmd, "%s %s %s &", CAMERA_CMD, tokens[0], tokens[2];
+            if (verbose) printf("Executing: %s\n", cmd);
+            ret = system(cmd);
 
-        if (ret != 0) {
-            snprintf(resp, 255, "KO %s %s", tokens[1], tokens[2]);
-            return resp;
-        } else {
-            snprintf(resp, 255, "OK %s %s", tokens[1], tokens[2]);
-            return resp;
+            if (ret != 0) {
+                snprintf(resp, 255, "KO %s %s", tokens[1], tokens[2]);
+                return resp;
+            } else {
+                snprintf(resp, 255, "OK %s %s", tokens[1], tokens[2]);
+                return resp;
+            }
         }
-    } else if (strcmp(tokens[0], "heartbeat") == 0) {
-
     } else if (strcmp(tokens[0], "takepicture") == 0) {
         char timeString[128];
         timeval curTime;
@@ -265,9 +274,6 @@ static double SpiReadChannel(AnalogTelemetry * at, int channel) {
     uint8_t inbuf[3] = {1, (2+channel) << 6, 0};
     spi_transaction(at->spi, inbuf, outbuf, sizeof(outbuf));
     int output = ((outbuf[1] & 3) << 8) + outbuf[2];
-    if (verbose >= 2) {
-        printf("ADC: %i, %i, %i \n", outbuf[0], outbuf[1], outbuf[2]);
-    }
     return (double)output;
 }
 
