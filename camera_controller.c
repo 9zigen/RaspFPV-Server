@@ -49,6 +49,8 @@ static const double DEFAULT_SENSOR_MAX_VOLTS = 51.8;
 static const double DEFAULT_SENSOR_MAX_AMPS = 89.4;
 static const void * NO_SPI = (void*)1;
 
+#define ANALOG_SAMPLES 10
+
 struct AnalogTelemetry {
     SPIInterface *spi;
     int spi_bus;
@@ -263,10 +265,10 @@ static double SpiReadChannel(AnalogTelemetry * at, int channel) {
     uint8_t inbuf[3] = {1, (2+channel) << 6, 0};
     spi_transaction(at->spi, inbuf, outbuf, sizeof(outbuf));
     int output = ((outbuf[1] & 3) << 8) + outbuf[2];
-    if (verbose) {
+    if (verbose >= 2) {
         printf("ADC: %i, %i, %i \n", outbuf[0], outbuf[1], outbuf[2]);
     }
-    return (double)output / (double)ADC_MAX;
+    return (double)output;
 }
 
 void recvSPI() {
@@ -275,13 +277,26 @@ void recvSPI() {
     dt = TimeSpecDiff(&t5, &adc);
     dt_ms = dt->tv_sec * 1000 + dt->tv_nsec / 1000000;
     
-    double voltage = SpiReadChannel(at, at->voltage_channel) * at->max_volts;
-    double current = SpiReadChannel(at, at->current_channel) * at->max_amps;
+    int sample_v;
+    long sample_sum_v = 0;
+    for (sample_v = 0; sample_v < ANALOG_SAMPLES; sample_v++) {
+        sample_sum_v += SpiReadChannel(at, at->voltage_channel);
+    }
+    double voltage = (sample_sum_v / ANALOG_SAMPLES) * at->max_volts / (double)ADC_MAX;
+
+    int sample_i;
+    long sample_sum_i = 0;
+    for (sample_i = 0; sample_i < ANALOG_SAMPLES; sample_i++) {
+        sample_sum_i += SpiReadChannel(at, at->current_channel);
+    }
+    double current = (sample_sum_i / ANALOG_SAMPLES) * at->max_amps / (double)ADC_MAX;
+    
     telem.volt = voltage;
     telem.amp = current;
 
-    if (verbose) {
+    if (verbose >= 2) {
         if (dt_ms > 3000) {
+            adc = t5
             printf("Voltage: %lf\n", voltage);
             printf("Current: %lf\n", current);
         }

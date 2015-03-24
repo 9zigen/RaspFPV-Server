@@ -53,7 +53,7 @@ case "$1" in
 				if [ ! -e "$StreamingStatusFile" ]; then
 					echo "Start STREAMING"
 
-					/usr/bin/raspivid -vf -w $w -h $h -fps 49 -b 2500000 -t 0 -n -pf base -o - | gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=1 pt=96 ! udpsink port=$4 host=$3 &
+					/usr/bin/raspivid -w $w -h $h -fps 49 -b 2500000 -t 0 -n -pf base -o - | gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=1 pt=96 ! udpsink port=$4 host=$3 &
 					PID=$!
 					echo $PID > $PIDFile
 					echo $3 $4 $w $h > $StreamingStatusFile
@@ -61,12 +61,8 @@ case "$1" in
 				;;
 			stop)
 				echo "Stop STREAMING"
-				if [ -e "$StreamingStatusFile" ]; then
-					rm $StreamingStatusFile
-				fi
-				if [ -z "$PID" ]; then
-					killRaspivid
-				fi
+				rm $StreamingStatusFile
+				killRaspivid
 				;;
 			*)
 				echo "Usage $0 $1 {start|stop} host port [width] [height]"
@@ -92,7 +88,7 @@ case "$1" in
 				if [ -z "$PID" ]; then
 					echo "Start RECORDING"
 				
-					/usr/bin/raspivid -vf -w $w -h $h -fps 49 -b 2500000 -t 0 -n -pf base -o - | tee /rpicopter/cam/video-$ts.h264 | gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=1 pt=96 ! udpsink port=$4 host=$3 &
+					/usr/bin/raspivid -w $w -h $h -fps 49 -b 2500000 -t 0 -n -pf base -o - | tee /rpicopter/cam/video-$ts.h264 | gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=1 pt=96 ! udpsink port=$4 host=$3 &
 					PID=$!
 					echo $PID > $PIDFile
 					echo $3 $4 $w $h > $RecordStatusFile
