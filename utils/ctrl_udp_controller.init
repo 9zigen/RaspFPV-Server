@@ -5,9 +5,9 @@
 ### END INIT INFO
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin/
-NAME=camera_controller
-DESC="cameraController daemon"
-DAEMON=/usr/local/bin/camera_controller
+NAME=udp_controller
+DESC="UDPController daemon"
+DAEMON=/usr/local/bin/udp_controller
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/"$NAME"
 DAEMON_OPTS="-d -i $PIDFILE > /dev/null"

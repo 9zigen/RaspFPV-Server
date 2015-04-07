@@ -1,0 +1,7 @@
+# build
+*.o
+*.d
+udp_controller
+
+# mac
+.DS_Store
